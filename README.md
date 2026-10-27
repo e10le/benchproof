@@ -7,19 +7,20 @@ Development began October 26, 2026 for the Meta Global AI Developer Hackathon (I
 
 ## Status
 
-This is the offline core. It makes no model calls yet.
+The rule engine runs offline. The scene judge calls Muse Spark Open on Baseten.
 
 - Procedure, judgment and calibration contracts with validation (`benchproof/models.py`)
 - Deterministic pass / fail / insufficient rules over one capture's perception output (`benchproof/predicates.py`)
 - Session state: prerequisites, invariants, pre-closure inspection, overrides, completion record (`benchproof/session.py`)
 - Append-only run history: every request, rejection, judgment, override, revocation and cancellation is synced to `runs/<session>.jsonl` before the session state changes (`benchproof/history.py`)
+- Scene judge: Muse Spark Open (`meta-models/muse-spark-open-1026` on Baseten) reads a photo and reports visibility, lid state, item counts and unexpected objects; its reply is validated before use, with timeouts, limited retries and a per-session call budget (`benchproof/scene.py`)
 - A Streamlit page for capturing and hand-labeling test photos (`app.py`)
 
 The tests drive the rules with synthetic masks. Those results check the logic only; they say nothing
 about how well real perception works on real photos.
 
-Planned next: Muse Voice Transcribe for narration, Muse Spark 1.3 for drafting the procedure and
-reading each scene, and SAM 3.1 for object masks, all through the Meta Model API.
+Planned next: SAM 3.1 object masks through the Meta Model API, a check page that runs both models on
+each photo, Muse Voice Transcribe for narration, and Muse Spark 1.3 for drafting the procedure.
 
 ## The test task
 
@@ -55,6 +56,16 @@ Label saves use a shared lock so two app instances cannot write conflicting reco
 is interrupted and the app reports a stale `captures/.labels.lock`, close every app instance
 before removing that lock and retrying. Keep saved images and their label log together.
 
+## Try the scene judge on one photo
+
+Set your Baseten API key in the terminal (never in a file in this repository), then run the judge on
+any JPEG or PNG. It uses at most two model calls.
+
+```
+set BASETEN_API_KEY=your-key
+python -m benchproof.scene path\to\photo.jpg
+```
+
 ## Development checks
 
 ```
@@ -68,10 +79,14 @@ python -m pip check
 
 The image thresholds are starting values, not measured accuracy guarantees. Symmetric objects can
 rotate without a distinguishable visual change; keep the camera and box fixed and use an asymmetric
-orientation cue in real capture tests. Model adapters, narration, drafting, and zone-drawing UI
-remain future work. No synthetic-mask test establishes real-world perception accuracy.
+orientation cue in real capture tests. The SAM adapter, check page, narration, drafting and
+zone-drawing UI remain future work. No synthetic-mask test establishes real-world perception accuracy.
 
 ## License
 
 Application code: MIT (see `LICENSE`). Model and dependency licenses are separate and are listed
 here when each model is integrated.
+
+Built with Muse Spark Open, used under the
+[Muse Model License](https://huggingface.co/meta-models/Muse-Spark-Open-816B-A42B/blob/main/LICENSE.md)
+through Baseten's hosted Model API.

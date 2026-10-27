@@ -212,7 +212,7 @@ def evaluate(
     obs: CaptureObservation,
     condition_ids: list[str],
 ) -> list[ConditionResult]:
-    _check_assessment(procedure, obs.scene)
+    check_assessment(procedure, obs.scene)
 
     box = obs.largest("box")
     registration_problem = check_registration(calibration, obs)
@@ -243,7 +243,7 @@ def evaluate(
     return results
 
 
-def _check_assessment(procedure: Procedure, scene: SceneAssessment) -> None:
+def check_assessment(procedure: Procedure, scene: SceneAssessment) -> None:
     expected = {i.id for i in procedure.items}
     reported = set(scene.item_counts)
     if reported != expected:
