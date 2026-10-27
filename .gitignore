@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+.venv/
+.pytest_cache/
+.ruff_cache/
+
+# API keys live here; never commit them.
+.streamlit/secrets.toml
+.env
+.env.*
+!.env.example
+
+# Local review and test outputs are not source files.
+.coverage
+coverage.xml
+htmlcov/
+*.log
+
+# Photos of a real desk stay local until you choose which ones to publish as evaluation data.
+captures/
