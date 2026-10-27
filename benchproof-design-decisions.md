@@ -164,6 +164,7 @@ These tests establish rule behavior, not perception quality.
 - Contracts: Procedure (graph validation, author approval), ZoneCalibration (valid, non-overlapping polygons), SceneAssessment (the judge model's structured-output schema), ConditionResult, Judgment, CompletionRecord. Reject non-finite geometry and coercion of fractional counts.
 - Deterministic predicates: box_empty, divider_in_place (registration), item_in_zone, inventory_exact; two-source closure with lid coverage; mask de-duplication; box and divider rotation/extent checks.
 - Session: prerequisites, interchangeable steps, invariants, single-capture final inspection, revocation on visible change or observed registration drift, recalibration revokes inspection, fresh-capture ID and image-digest enforcement, acquisition-sequence ordering, serialized session updates, marked overrides with original outcomes.
+- Run history: an append-only event log per session, synced to disk before each state change. Ordered by index, not time. Rejected requests, revocations, overrides and cancellation are separate events; a check that crashes stays as an unanswered request. After a failed write the session stops accepting requests. No replay or resume.
 - Streamlit capture-and-label page writing captures/<split>/labels.jsonl. Labels include normalized image digests. Reject cross-split sequence or identical-image leakage, serialize saves, and keep file failures visible.
 
 Registration still cannot distinguish symmetric turns from mask geometry alone. Keep the

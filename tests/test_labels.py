@@ -222,3 +222,9 @@ def test_oversized_image_is_rejected_without_writing(tmp_path, monkeypatch):
         save(tmp_path / "development")
 
     assert not (tmp_path / "development").exists()
+
+
+def test_note_with_unicode_line_separator_loads(tmp_path):
+    label = save(tmp_path, note="cable\u2028under the mouse")
+
+    assert load_labels(tmp_path) == [label]

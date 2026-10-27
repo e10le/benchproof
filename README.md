@@ -12,6 +12,7 @@ This is the offline core. It makes no model calls yet.
 - Procedure, judgment and calibration contracts with validation (`benchproof/models.py`)
 - Deterministic pass / fail / insufficient rules over one capture's perception output (`benchproof/predicates.py`)
 - Session state: prerequisites, invariants, pre-closure inspection, overrides, completion record (`benchproof/session.py`)
+- Append-only run history: every request, rejection, judgment, override, revocation and cancellation is synced to `runs/<session>.jsonl` before the session state changes (`benchproof/history.py`)
 - A Streamlit page for capturing and hand-labeling test photos (`app.py`)
 
 The tests drive the rules with synthetic masks. Those results check the logic only; they say nothing

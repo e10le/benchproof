@@ -13,6 +13,7 @@ from uuid import uuid4
 from PIL import Image, ImageOps
 from pydantic import Field
 
+from benchproof.jsonl import read_lines
 from benchproof.models import ID_PATTERN, IMAGE_SHA256_PATTERN, Outcome, StrictModel, UtcDatetime
 
 LABELS_FILE = "labels.jsonl"
@@ -72,8 +73,7 @@ def load_labels(directory: Path) -> list[CaptureLabel]:
     if not path.exists():
         return []
 
-    lines = path.read_text(encoding="utf-8").splitlines()
-    return [CaptureLabel.model_validate_json(line) for line in lines if line.strip()]
+    return [CaptureLabel.model_validate_json(line) for line in read_lines(path)]
 
 
 @contextmanager

@@ -4,20 +4,20 @@ from datetime import timedelta, timezone
 
 import pytest
 
+from benchproof.history import RunLog
 from benchproof.models import CLOSURE_CONDITION_ID, COMPLETION_CLAIM, Outcome, Visibility
 from benchproof.predicates import Detection, calibrate
 from benchproof.session import Session
-from scenes import DIVIDER, LEFT_SLOTS, PACKED, RIGHT_SLOTS, ZONES, observation, placed, rect_mask
+from scenes import DIVIDER, LEFT_SLOTS, PACKED, RIGHT_SLOTS, ZONES, observation, placed, rect_mask, without
 
 
-def without(*item_ids: str) -> dict[str, tuple[int, int, int, int]]:
-    return {k: v for k, v in PACKED.items() if k not in item_ids}
-
-
-def test_unapproved_procedure_cannot_start(procedure):
+def test_unapproved_procedure_cannot_start(procedure, tmp_path):
     unapproved = procedure.model_copy(update={"approved_by": None, "approved_at": None})
+    log = RunLog(tmp_path)
     with pytest.raises(ValueError, match="approved"):
-        Session(unapproved)
+        Session(unapproved, log)
+
+    assert log.path.read_text(encoding="utf-8") == ""
 
 
 def test_full_run_produces_record_with_bounded_claim(inspected, clock):

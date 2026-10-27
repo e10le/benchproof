@@ -92,3 +92,7 @@ def observation(
 
 def placed(slots: dict[str, tuple[int, int, int, int]]) -> dict[str, list[tuple[int, int, int, int]]]:
     return {item_id: [r] for item_id, r in slots.items()}
+
+
+def without(*item_ids: str) -> dict[str, tuple[int, int, int, int]]:
+    return {k: v for k, v in PACKED.items() if k not in item_ids}

@@ -3,6 +3,7 @@ from datetime import timedelta
 
 import pytest
 
+from benchproof.history import RunLog
 from benchproof.models import Procedure
 from benchproof.predicates import calibrate
 from benchproof.session import Session
@@ -21,8 +22,8 @@ def clock():
 
 
 @pytest.fixture
-def session(procedure: Procedure) -> Session:
-    return Session(procedure)
+def session(procedure: Procedure, tmp_path) -> Session:
+    return Session(procedure, RunLog(tmp_path / "runs"))
 
 
 @pytest.fixture
