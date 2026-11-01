@@ -1,20 +1,19 @@
 """Hand labels for test captures, written before any model sees the image."""
 
-import io
 import os
 from collections.abc import Iterator
 from contextlib import contextmanager
 from datetime import UTC, datetime
 from enum import StrEnum
-from hashlib import sha256
 from pathlib import Path
 from uuid import uuid4
 
-from PIL import Image, ImageOps
+from PIL import Image
 from pydantic import Field
 
 from benchproof.jsonl import read_lines
 from benchproof.models import ID_PATTERN, IMAGE_SHA256_PATTERN, Outcome, StrictModel, UtcDatetime
+from benchproof.photos import open_upright, pixel_digest
 
 LABELS_FILE = "labels.jsonl"
 
@@ -135,13 +134,8 @@ def save_capture(
     labeled_at = datetime.now(UTC)
     capture_id = f"{labeled_at:%Y%m%dT%H%M%S%f}-{scenario}"
 
-    try:
-        with Image.open(io.BytesIO(image_bytes)) as source:
-            image = ImageOps.exif_transpose(source).convert("RGB")
-    except Image.DecompressionBombError as e:
-        raise ValueError("photo is too large; lower the camera resolution and retake it") from e
-    dimensions = image.width.to_bytes(8, "big") + image.height.to_bytes(8, "big")
-    image_sha256 = sha256(dimensions + image.tobytes()).hexdigest()
+    image = open_upright(image_bytes)
+    image_sha256 = pixel_digest(image)
 
     label = CaptureLabel(
         capture_id=capture_id,
