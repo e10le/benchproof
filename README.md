@@ -79,6 +79,18 @@ set BASETEN_API_KEY=your-baseten-key
 python -m benchproof.perceive path\to\photo.jpg
 ```
 
+## Find SAM phrases that match your objects
+
+Try several phrases on one photo. Each phrase is one SAM call. For every phrase it prints how many
+objects matched, with confidence, and saves an image to `prompt_tests/` showing what was matched.
+
+```
+set MODEL_API_KEY=your-meta-key
+python -m benchproof.prompt_test path\to\photo.jpg "black cable" "usb cable" "wire"
+```
+
+Put the winning phrase into `procedures/mobile_desk_kit.json` before the held-out evaluation.
+
 ## Draft a procedure from your narration
 
 Write what you do and why in a text file, then pass it with up to 8 photos of the demonstration in

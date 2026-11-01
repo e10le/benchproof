@@ -24,3 +24,6 @@ runs/
 
 # Model drafts are unreviewed; copy one into procedures/ only after you approve it.
 drafts/
+
+# Prompt-test images show local photos.
+prompt_tests/

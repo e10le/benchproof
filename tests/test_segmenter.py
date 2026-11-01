@@ -3,13 +3,13 @@ import base64
 import httpx2
 import numpy as np
 import pytest
-from sam_fake import LANE, FakeSam, line, record
 
 from benchproof import llm
 from benchproof.llm import META_BASE_URL, CallBudget, ModelError
 from benchproof.photos import prepare
 from benchproof.segmenter import SAM_MODEL, scene_prompts
 from endpoint import event_stream, png_bytes
+from sam_fake import LANE, FakeSam, line, record
 
 PHOTO = prepare(png_bytes())  # 8 x 6
 FRAME = (PHOTO.width, PHOTO.height)

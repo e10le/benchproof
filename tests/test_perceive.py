@@ -3,7 +3,6 @@ import json
 from datetime import UTC, datetime
 
 from PIL import Image
-from sam_fake import FakeSam, line, record
 
 from benchproof.llm import SPARK_OPEN_MODEL, CallBudget
 from benchproof.models import Outcome
@@ -12,6 +11,7 @@ from benchproof.photos import prepare
 from benchproof.predicates import calibrate, evaluate
 from benchproof.scene import SceneJudge
 from endpoint import FakeEndpoint, reply
+from sam_fake import FakeSam, line, record
 from scenes import BOX, DIVIDER, HEIGHT, PACKED, T0, WIDTH, ZONES, observation
 
 FRAME = (WIDTH, HEIGHT)

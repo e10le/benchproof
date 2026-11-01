@@ -6,7 +6,7 @@ target-version = "py312"
 select = ["E", "F", "I", "B", "UP"]
 
 [tool.ruff.lint.isort]
-known-first-party = ["benchproof", "endpoint", "scenes"]
+known-first-party = ["benchproof", "endpoint", "sam_fake", "scenes"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
