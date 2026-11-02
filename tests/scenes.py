@@ -27,7 +27,7 @@ LEFT_SLOTS = {"notebook": (70, 70, 60, 80), "marker": (140, 180, 40, 20)}
 RIGHT_SLOTS = {"mouse": (220, 70, 40, 50), "cable": (270, 160, 50, 50)}
 PACKED = {**LEFT_SLOTS, **RIGHT_SLOTS}
 
-PROCEDURE_PATH = Path(__file__).parent.parent / "procedures" / "mobile_desk_kit.json"
+PROCEDURE_PATH = Path(__file__).parent / "fixtures" / "test_kit.json"
 T0 = datetime(2026, 10, 27, 9, 0, tzinfo=UTC)
 
 # Building an observation stands in for taking the photo, so construction order is acquisition order.

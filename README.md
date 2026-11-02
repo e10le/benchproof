@@ -1,13 +1,16 @@
 # BenchProof
 
-BenchProof checks a physical procedure against captured visual evidence. This offline prototype
-contains the rule engine, session state and photo-labeling page for a mobile-desk packing task.
+BenchProof checks a physical procedure against captured visual evidence. You take a photo after each
+step; SAM 3.1 and Muse Spark look at it, and deterministic rules say pass, fail or insufficient
+evidence, with the fix to make. The prototype covers a mobile-desk packing task.
 
 Development began October 26, 2026 for the Meta Global AI Developer Hackathon (Indie track).
 
 ## Status
 
 The rule engine runs offline. Perception calls SAM 3.1 on Meta Model API and Muse Spark Open on Baseten.
+
+- Check page: start a session, take or upload a photo for a step, approve the compartments when the divider goes in, and see the result drawn on the photo with the fix for anything that failed (`pages/1_Check.py`, `benchproof/checking.py`, `benchproof/drawing.py`)
 
 - Procedure, judgment and calibration contracts with validation (`benchproof/models.py`)
 - Deterministic pass / fail / insufficient rules over one capture's perception output (`benchproof/predicates.py`)
@@ -22,24 +25,28 @@ The rule engine runs offline. Perception calls SAM 3.1 on Meta Model API and Mus
 The tests drive the rules with synthetic masks. Those results check the logic only; they say nothing
 about how well real perception works on real photos.
 
-Planned next: a check page that runs perception on each photo and shows the result, Muse Voice Transcribe for narration, and an approval page for drafted procedures.
+Planned next: a run history viewer, Muse Voice Transcribe for narration, and an approval page for drafted procedures.
 
 ## The test task
 
-Pack a mobile-desk kit: an open box, a cardboard divider, a notebook, a thick marker, a mouse and a
-bundled cable. The approved procedure is in `procedures/mobile_desk_kit.json`:
+Pack a mobile-desk kit: an open cardboard box, a colored divider, a mouse, a highlighter, a bundled
+cable and a power bank. The procedure is in `procedures/mobile_desk_kit.json`:
 
 1. Show the open, empty box.
-2. Position the divider and approve the two zones.
-3. Pack the notebook and marker in the left compartment.
-4. Pack the mouse and cable in the right compartment. (Steps 3 and 4 can happen in either order.)
+2. Place the divider across the box and approve the two zones.
+3. Pack the mouse and highlighter in the top compartment.
+4. Pack the cable and power bank in the bottom compartment. (Steps 3 and 4 can happen in either order.)
 5. Inspect the contents in one photo before closing.
+
+The rule tests use a separate fixed kit in `tests/fixtures/test_kit.json`, so changing the real kit
+does not change what the tests check.
 
 The record claims only "contents observed before closure". It does not claim the items work or that
 nothing changed between photos.
 
-The SAM prompts in the procedure file are first guesses. They are compared on development photos and
-frozen before the held-out evaluation.
+The SAM phrases in the procedure file were chosen with the phrase-testing tool on development photos.
+The divider phrase is provisional until a colored divider is tested. Phrases are frozen before the
+held-out evaluation.
 
 ## Run it (Windows, Python 3.12)
 
@@ -51,12 +58,30 @@ pytest
 streamlit run app.py
 ```
 
+`streamlit run app.py` opens the labeling page; the check page is in the sidebar.
+
 Labeled photos are written to `captures/<split>/`, which git ignores.
 Keep a complete recording sequence in one split. The labeling page rejects a sequence or identical
 image content that was already saved in the other split.
 Label saves use a shared lock so two app instances cannot write conflicting records. If a save
 is interrupted and the app reports a stale `captures/.labels.lock`, close every app instance
 before removing that lock and retrying. Keep saved images and their label log together.
+
+## Check a packing session
+
+Set both keys in the same terminal, then start the app and open **Check** in the sidebar:
+
+```
+set MODEL_API_KEY=your Meta Model API key
+set BASETEN_API_KEY=your Baseten hackathon key
+streamlit run app.py
+```
+
+Enter your name to approve the procedure, then follow the steps. At the divider step the page
+proposes two compartments from the box and divider it found; adjust them if needed and approve.
+Every later photo is checked against those compartments. Each photo costs at least 8 model calls, and a
+session stops at 200. Every request and result is written to `runs/<session>.jsonl`, which git
+ignores. When the box is closed after a passing inspection, the page offers the evidence record.
 
 ## Try the scene judge on one photo
 
@@ -114,8 +139,8 @@ python -m pip check
 
 The image thresholds are starting values, not measured accuracy guarantees. Symmetric objects can
 rotate without a distinguishable visual change; keep the camera and box fixed and use an asymmetric
-orientation cue in real capture tests. The check page, narration, draft approval and zone-drawing UI
-remain future work. No synthetic-mask test establishes real-world perception accuracy.
+orientation cue in real capture tests. Proposed zones are rectangles aligned with the photo; keep
+the box square to the camera. Narration and draft approval remain future work. No synthetic-mask test establishes real-world perception accuracy.
 
 ## License
 

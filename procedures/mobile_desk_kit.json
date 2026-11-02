@@ -3,14 +3,33 @@
   "revision": 1,
   "title": "Pack the mobile-desk kit",
   "items": [
-    {"id": "notebook", "name": "notebook", "sam_prompt": "notebook"},
-    {"id": "marker", "name": "marker", "sam_prompt": "thick marker"},
-    {"id": "mouse", "name": "mouse", "sam_prompt": "computer mouse"},
-    {"id": "cable", "name": "cable", "sam_prompt": "coiled cable"}
+    {
+      "id": "mouse",
+      "name": "mouse",
+      "sam_prompt": "computer mouse"
+    },
+    {
+      "id": "marker",
+      "name": "highlighter",
+      "sam_prompt": "yellow marker"
+    },
+    {
+      "id": "cable",
+      "name": "cable",
+      "sam_prompt": "black cable"
+    },
+    {
+      "id": "charger",
+      "name": "power bank",
+      "sam_prompt": "black rectangle"
+    }
   ],
-  "zones": ["left", "right"],
+  "zones": [
+    "top",
+    "bottom"
+  ],
   "box_prompt": "cardboard box",
-  "divider_prompt": "cardboard divider",
+  "divider_prompt": "green divider",
   "lid_prompt": "box lid",
   "conditions": [
     {
@@ -28,40 +47,40 @@
       "recovery": "Put the divider back in its approved position, or recalibrate the zones."
     },
     {
-      "id": "notebook_left",
-      "kind": "item_in_zone",
-      "role": "invariant",
-      "item": "notebook",
-      "zone": "left",
-      "description": "The notebook is in the left compartment.",
-      "recovery": "Put the notebook fully inside the left compartment."
-    },
-    {
-      "id": "marker_left",
-      "kind": "item_in_zone",
-      "role": "invariant",
-      "item": "marker",
-      "zone": "left",
-      "description": "The marker is in the left compartment.",
-      "recovery": "Put the marker fully inside the left compartment."
-    },
-    {
-      "id": "mouse_right",
+      "id": "mouse_top",
       "kind": "item_in_zone",
       "role": "invariant",
       "item": "mouse",
-      "zone": "right",
-      "description": "The mouse is in the right compartment.",
-      "recovery": "Put the mouse fully inside the right compartment."
+      "zone": "top",
+      "description": "The mouse is in the top compartment.",
+      "recovery": "Put the mouse fully inside the top compartment."
     },
     {
-      "id": "cable_right",
+      "id": "marker_top",
+      "kind": "item_in_zone",
+      "role": "invariant",
+      "item": "marker",
+      "zone": "top",
+      "description": "The highlighter is in the top compartment.",
+      "recovery": "Put the highlighter fully inside the top compartment."
+    },
+    {
+      "id": "cable_bottom",
       "kind": "item_in_zone",
       "role": "invariant",
       "item": "cable",
-      "zone": "right",
-      "description": "The bundled cable is in the right compartment.",
-      "recovery": "Put the bundled cable fully inside the right compartment."
+      "zone": "bottom",
+      "description": "The bundled cable is in the bottom compartment.",
+      "recovery": "Put the bundled cable fully inside the bottom compartment."
+    },
+    {
+      "id": "charger_bottom",
+      "kind": "item_in_zone",
+      "role": "invariant",
+      "item": "charger",
+      "zone": "bottom",
+      "description": "The power bank is in the bottom compartment.",
+      "recovery": "Put the power bank fully inside the bottom compartment."
     },
     {
       "id": "contents_exact",
@@ -76,35 +95,56 @@
       "id": "show_empty_box",
       "title": "Show the open, empty box",
       "action": "Place the open box under the camera with nothing inside.",
-      "conditions": ["box_empty"]
+      "conditions": [
+        "box_empty"
+      ]
     },
     {
       "id": "place_divider",
       "title": "Position the divider",
-      "action": "Place the divider so both compartments are visible, then approve the zones.",
-      "requires": ["show_empty_box"],
-      "conditions": ["divider_placed"]
+      "action": "Place the divider across the middle of the box, then approve the two zones.",
+      "requires": [
+        "show_empty_box"
+      ],
+      "conditions": [
+        "divider_placed"
+      ]
     },
     {
-      "id": "pack_left",
-      "title": "Pack the left compartment",
-      "action": "Place the notebook and the marker in the left compartment.",
-      "requires": ["place_divider"],
-      "conditions": ["notebook_left", "marker_left"]
+      "id": "pack_top",
+      "title": "Pack the top compartment",
+      "action": "Place the mouse and the highlighter in the top compartment.",
+      "requires": [
+        "place_divider"
+      ],
+      "conditions": [
+        "mouse_top",
+        "marker_top"
+      ]
     },
     {
-      "id": "pack_right",
-      "title": "Pack the right compartment",
-      "action": "Place the mouse and the bundled cable in the right compartment.",
-      "requires": ["place_divider"],
-      "conditions": ["mouse_right", "cable_right"]
+      "id": "pack_bottom",
+      "title": "Pack the bottom compartment",
+      "action": "Place the bundled cable and the power bank in the bottom compartment.",
+      "requires": [
+        "place_divider"
+      ],
+      "conditions": [
+        "cable_bottom",
+        "charger_bottom"
+      ]
     },
     {
       "id": "inspect_contents",
       "title": "Inspect before closing",
       "action": "Keep the lid open and take one photo of the whole interior.",
-      "requires": ["pack_left", "pack_right"],
-      "conditions": ["contents_exact"],
+      "requires": [
+        "pack_top",
+        "pack_bottom"
+      ],
+      "conditions": [
+        "contents_exact"
+      ],
       "final_inspection": true
     }
   ]

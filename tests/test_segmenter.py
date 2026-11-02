@@ -1,10 +1,12 @@
 import base64
+import threading
+import time
 
 import httpx2
 import numpy as np
 import pytest
 
-from benchproof import llm
+from benchproof import llm, segmenter
 from benchproof.llm import META_BASE_URL, CallBudget, ModelError
 from benchproof.photos import prepare
 from benchproof.segmenter import SAM_MODEL, scene_prompts
@@ -142,3 +144,47 @@ def test_meta_client_requires_its_key(monkeypatch):
 def test_meta_client_targets_the_meta_api(monkeypatch):
     monkeypatch.setenv("MODEL_API_KEY", "test-key")
     assert str(llm.meta_client().base_url).rstrip("/") == META_BASE_URL
+
+
+class SlowSam(FakeSam):
+    """Records when each request starts and ends, holding each one open briefly."""
+
+    def __init__(self, replies):
+        super().__init__(replies)
+        self.events: list[str] = []
+        self.active = self.most_active = 0
+
+    def handle(self, request):
+        with self._lock:
+            self.active += 1
+            self.most_active = max(self.most_active, self.active)
+            self.events.append("start")
+        time.sleep(0.05)
+        reply = super().handle(request)
+        with self._lock:
+            self.active -= 1
+            self.events.append("end")
+        return reply
+
+
+@pytest.fixture
+def fresh_process(monkeypatch):
+    monkeypatch.setattr(segmenter, "_types_built", threading.Event())
+
+
+def test_first_request_in_a_process_runs_alone_then_requests_overlap(procedure, fresh_process):
+    sam = SlowSam({})
+    sam.segmenter().segment_all(procedure, PHOTO)
+
+    assert sam.events[:2] == ["start", "end"]
+    assert sam.most_active > 1
+
+
+def test_a_failed_first_request_leaves_the_next_one_to_run_alone(fresh_process):
+    failing = httpx2.Response(500, json={"error": {"message": "failed"}})
+    with pytest.raises(ModelError):
+        FakeSam({"mouse": failing}).segmenter().segment(PHOTO, "mouse", "mouse")
+
+    assert not segmenter._types_built.is_set()
+    FakeSam({}).segmenter().segment(PHOTO, "mouse", "mouse")
+    assert segmenter._types_built.is_set()

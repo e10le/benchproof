@@ -20,8 +20,8 @@ def test_labeling_page_renders_with_all_steps():
         "None (closure or recheck)",
         "Show the open, empty box",
         "Position the divider",
-        "Pack the left compartment",
-        "Pack the right compartment",
+        "Pack the top compartment",
+        "Pack the bottom compartment",
         "Inspect before closing",
     ]
 

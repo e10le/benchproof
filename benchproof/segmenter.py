@@ -4,6 +4,7 @@ SAM takes one short noun phrase per request and returns every match as a box plu
 Output is decoded with Meta's meta-sam-parser and pasted into full-photo masks for the predicates.
 """
 
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
 import cv2
@@ -23,6 +24,12 @@ from benchproof.photos import Photo
 from benchproof.predicates import Detection
 
 SAM_MODEL = "sam-3.1"
+
+# The openai library builds its stream event types the first time it parses one, and threads doing
+# that at the same moment can fail with pydantic errors. The first request in a process therefore
+# runs alone; once it has parsed a full stream, requests run in parallel.
+_first_request = threading.Lock()
+_types_built = threading.Event()
 
 
 def scene_prompts(procedure: Procedure) -> dict[str, str]:
@@ -61,6 +68,15 @@ class Segmenter:
         return detections
 
     def _request(self, photo: Photo, prompt: str) -> str:
+        if not _types_built.is_set():
+            with _first_request:
+                if not _types_built.is_set():
+                    text = self._send(photo, prompt)
+                    _types_built.set()
+                    return text
+        return self._send(photo, prompt)
+
+    def _send(self, photo: Photo, prompt: str) -> str:
         self._budget.spend()
         try:
             stream = self._client.responses.create(

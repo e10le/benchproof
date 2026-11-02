@@ -4,10 +4,11 @@ import numpy as np
 import pytest
 from PIL import Image
 
+from benchproof.drawing import overlay
 from benchproof.llm import CallBudget, ModelError
 from benchproof.photos import prepare
 from benchproof.predicates import Detection
-from benchproof.prompt_test import overlay, run, slug
+from benchproof.prompt_test import run, slug
 from sam_fake import FakeSam, line, record
 
 SIZE = (40, 30)

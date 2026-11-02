@@ -5,50 +5,26 @@ Each phrase is one SAM call. Images are written to prompt_tests/<photo name>/.
 """
 
 import argparse
-import io
 import re
 import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-import cv2
-import numpy as np
 from PIL import Image
 
+from benchproof.drawing import overlay
 from benchproof.llm import CallBudget, meta_client
 from benchproof.photos import Photo, prepare
 from benchproof.predicates import Detection
 from benchproof.segmenter import Segmenter
 
 OUTPUT_DIR = Path("prompt_tests")
-# Distinct RGB colors so neighbouring matches can be told apart in the image.
-COLORS = [(230, 25, 75), (60, 180, 75), (0, 130, 200), (245, 130, 48), (145, 30, 180), (70, 240, 240)]
 
 
 def try_phrases(segmenter: Segmenter, photo: Photo, phrases: list[str]) -> dict[str, list[Detection]]:
     with ThreadPoolExecutor(max_workers=len(phrases)) as pool:
         found = pool.map(lambda phrase: segmenter.segment(photo, phrase, phrase), phrases)
         return dict(zip(phrases, found, strict=True))
-
-
-def overlay(photo: Photo, detections: list[Detection]) -> np.ndarray:
-    with Image.open(io.BytesIO(photo.jpeg)) as image:
-        canvas = np.array(image.convert("RGB"))
-
-    # Line and text size follow the photo so labels stay readable from thumbnails to full size.
-    scale = max(0.5, photo.width / 1000)
-    thickness = max(2, round(2 * scale))
-
-    for i, detection in enumerate(sorted(detections, key=lambda d: d.score, reverse=True)):
-        color = COLORS[i % len(COLORS)]
-        canvas[detection.mask] = (0.5 * canvas[detection.mask] + 0.5 * np.array(color)).astype(np.uint8)
-
-        ys, xs = np.nonzero(detection.mask)
-        top_left = (int(xs.min()), int(ys.min()))
-        cv2.rectangle(canvas, top_left, (int(xs.max()), int(ys.max())), color, thickness)
-        label_at = (top_left[0], max(top_left[1] - 6 * thickness, round(24 * scale)))
-        cv2.putText(canvas, f"{detection.score:.2f}", label_at, cv2.FONT_HERSHEY_SIMPLEX, scale, color, thickness)
-    return canvas
 
 
 def slug(text: str) -> str:
