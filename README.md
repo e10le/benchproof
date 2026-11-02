@@ -29,11 +29,11 @@ Planned next: a run history viewer, Muse Voice Transcribe for narration, and an 
 
 ## The test task
 
-Pack a mobile-desk kit: an open cardboard box, a colored divider, a mouse, a highlighter, a bundled
+Pack a mobile-desk kit: an open cardboard box, a book as the divider, a mouse, a highlighter, a bundled
 cable and a power bank. The procedure is in `procedures/mobile_desk_kit.json`:
 
 1. Show the open, empty box.
-2. Place the divider across the box and approve the two zones.
+2. Lay the book across the middle of the box and approve the two zones.
 3. Pack the mouse and highlighter in the top compartment.
 4. Pack the cable and power bank in the bottom compartment. (Steps 3 and 4 can happen in either order.)
 5. Inspect the contents in one photo before closing.
@@ -45,7 +45,7 @@ The record claims only "contents observed before closure". It does not claim the
 nothing changed between photos.
 
 The SAM phrases in the procedure file were chosen with the phrase-testing tool on development photos.
-The divider phrase is provisional until a colored divider is tested. Phrases are frozen before the
+Plain cardboard dividers matched the box walls, so a book is the divider. Phrases are frozen before the
 held-out evaluation.
 
 ## Run it (Windows, Python 3.12)

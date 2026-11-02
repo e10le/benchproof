@@ -57,7 +57,8 @@ Rules:
   covered (for example by a hand), "none" if the inside cannot be seen.
 - lid_closed: true only if a lid or flaps cover the box opening.
 - item_counts: how many of each kit item are inside the box. Use 0 if an item is absent or hidden.
-- unexpected_items: short names of objects inside the box that are not kit items. Ignore the cardboard divider."""
+- unexpected_items: short names of objects inside the box that are not kit items.
+- The {procedure.divider_prompt} across the box is the divider, not an unexpected item."""
 
 
 if __name__ == "__main__":

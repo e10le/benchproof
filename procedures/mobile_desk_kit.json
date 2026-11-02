@@ -29,7 +29,7 @@
     "bottom"
   ],
   "box_prompt": "cardboard box",
-  "divider_prompt": "green divider",
+  "divider_prompt": "book",
   "lid_prompt": "box lid",
   "conditions": [
     {
@@ -102,7 +102,7 @@
     {
       "id": "place_divider",
       "title": "Position the divider",
-      "action": "Place the divider across the middle of the box, then approve the two zones.",
+      "action": "Lay the book across the middle of the box as the divider, then approve the two zones.",
       "requires": [
         "show_empty_box"
       ],

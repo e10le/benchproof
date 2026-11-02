@@ -39,6 +39,16 @@ def test_request_sends_the_photo_and_the_kit_items(procedure):
     assert image["image_url"]["url"].startswith("data:image/png;base64,")
 
 
+def test_the_divider_named_in_the_procedure_is_not_an_unexpected_item(procedure):
+    endpoint = FakeEndpoint(reply(json.dumps(PACKED_READING)))
+
+    judge(endpoint).assess(procedure.model_copy(update={"divider_prompt": "paperback book"}), png_bytes())
+
+    text = endpoint.requests[0]["messages"][1]["content"][0]["text"]
+    assert "The paperback book across the box is the divider, not an unexpected item." in text
+    assert "cardboard" not in text
+
+
 @pytest.mark.parametrize(
     "bad_reading",
     [
