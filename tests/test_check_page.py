@@ -35,7 +35,7 @@ def test_start_page_lists_the_real_kit_steps():
 
     assert not at.exception
     assert at.title[0].value == "BenchProof: check"
-    assert any("Pack the top compartment" in m.value for m in at.markdown)
+    assert any("Pack the left compartment" in m.value for m in at.markdown)
 
 
 def test_missing_keys_show_an_error_instead_of_crashing(monkeypatch):

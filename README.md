@@ -33,9 +33,9 @@ Pack a mobile-desk kit: an open cardboard box, a book as the divider, a mouse, a
 cable and a power bank. The procedure is in `procedures/mobile_desk_kit.json`:
 
 1. Show the open, empty box.
-2. Lay the book across the middle of the box and approve the two zones.
-3. Pack the mouse and highlighter in the top compartment.
-4. Pack the cable and power bank in the bottom compartment. (Steps 3 and 4 can happen in either order.)
+2. Stand the book upright across the middle of the box and approve the two zones.
+3. Pack the mouse and highlighter in the left compartment.
+4. Pack the cable and power bank in the right compartment. (Steps 3 and 4 can happen in either order.)
 5. Inspect the contents in one photo before closing.
 
 The rule tests use a separate fixed kit in `tests/fixtures/test_kit.json`, so changing the real kit
