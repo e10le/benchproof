@@ -4,7 +4,7 @@ from datetime import UTC, datetime
 import numpy as np
 import pytest
 
-from bench import EMPTY, WITH_DIVIDER, Bench
+from bench import EMPTY, WITH_DIVIDER, Bench, perspective
 from benchproof import checking
 from benchproof.checking import propose_zones
 from benchproof.models import Outcome
@@ -129,3 +129,35 @@ def test_start_approves_the_procedure_in_the_authors_name(procedure, tmp_path, m
     assert checker.session.procedure.approved_by == "Phong"
     assert checker.budget.limit == checking.SESSION_CALL_LIMIT
     assert np.array(list(checker.session.log_path.parent.iterdir())).size == 1
+
+
+def test_zones_for_a_box_seen_at_an_angle_pass_calibration(procedure):
+    from benchproof.predicates import calibrate
+
+    reference = perspective(observation("c", T0))
+    zones = propose_zones(reference, procedure.zones)
+
+    calibration = calibrate(reference, zones, 1, "author", NOW)
+    assert {z.id for z in calibration.zones} == set(procedure.zones)
+
+
+def test_zones_adjusted_past_the_box_are_trimmed_to_it(procedure):
+    from benchproof.predicates import calibrate
+
+    reference = perspective(observation("c", T0))
+    left, right = propose_zones(reference, procedure.zones)
+    wide = left.model_copy(update={"polygon": checking.rectangle(0, 0, DIVIDER[0] - 5, 299)})
+
+    trimmed = checking.fit_to_box(reference, (wide, right))
+
+    calibrate(reference, trimmed, 1, "author", NOW)
+    assert max(x for x, _ in trimmed[0].polygon) <= DIVIDER[0] - 5
+
+
+def test_a_zone_entirely_outside_the_box_is_rejected(procedure):
+    reference = perspective(observation("c", T0))
+    _, right = propose_zones(reference, procedure.zones)
+    outside = right.model_copy(update={"polygon": checking.rectangle(360, 10, 395, 40)})
+
+    with pytest.raises(ValueError, match="outside the box"):
+        checking.fit_to_box(reference, (outside,))

@@ -2,12 +2,16 @@
 
 import io
 import json
+from dataclasses import replace
 
+import cv2
+import numpy as np
 from PIL import Image
 
 from benchproof.checking import Capture, Checker
 from benchproof.history import RunLog
 from benchproof.llm import SPARK_OPEN_MODEL, CallBudget
+from benchproof.predicates import Detection
 from benchproof.scene import SceneJudge
 from benchproof.session import Session
 from endpoint import FakeEndpoint, reply
@@ -60,3 +64,13 @@ class Bench:
 
 EMPTY = {"box": BOX}
 WITH_DIVIDER = {"box": BOX, "divider": DIVIDER}
+
+
+def perspective(obs, near_inset: int = 0, far_inset: int = 40):
+    """The same capture with the box seen at an angle: its far edge looks narrower than its near edge."""
+    x, y, w, h = BOX
+    corners = [(x + far_inset, y), (x + w - far_inset, y), (x + w - near_inset, y + h), (x + near_inset, y + h)]
+    mask = np.zeros(obs.detections[0].mask.shape, dtype=np.uint8)
+    cv2.fillPoly(mask, [np.array(corners, dtype=np.int32)], 1)
+    others = tuple(d for d in obs.detections if d.label != "box")
+    return replace(obs, detections=(*others, Detection("box", 0.95, mask.astype(bool))))

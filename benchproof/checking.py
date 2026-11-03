@@ -5,6 +5,8 @@ from dataclasses import dataclass
 from datetime import UTC, datetime
 from pathlib import Path
 
+import cv2
+import numpy as np
 from pydantic import AwareDatetime
 
 from benchproof import geometry
@@ -107,10 +109,39 @@ def propose_zones(observation: CaptureObservation, zone_ids: tuple[str, ...]) ->
         if x1 <= x0 or y1 <= y0:
             raise ValueError("the divider is too close to a box wall to split the box into two zones")
 
-    return tuple(
+    rectangles = tuple(
         Zone(id=zone_id, polygon=rectangle(*corners))
         for zone_id, corners in zip(zone_ids, (first, second), strict=True)
     )
+    return fit_to_box(observation, rectangles)
+
+
+def fit_to_box(observation: CaptureObservation, zones: tuple[Zone, ...]) -> tuple[Zone, ...]:
+    """Trim each zone to the box outline, kept a small margin inside it.
+
+    A camera looking into the box at an angle sees a trapezoid, so a rectangle drawn from the box's
+    bounding box has corners outside the box, and calibration rejects it.
+    """
+    box = observation.largest("box")
+    if box is None:
+        raise ValueError("the photo must show the box")
+
+    b, _, _ = geometry.box_pose(box.mask)
+    margin = max(1, round(ZONE_INSET * b.diagonal))
+    kernel = np.ones((2 * margin + 1, 2 * margin + 1), dtype=np.uint8)
+    inner = cv2.erode(geometry.filled_hull(box.mask).astype(np.uint8), kernel)
+    points = cv2.findNonZero(inner)
+    if points is None:
+        raise ValueError("the box is too small in the photo to place zones; move the camera closer")
+    outline = cv2.convexHull(points).reshape(-1, 2).astype(np.float32)
+
+    fitted = []
+    for zone in zones:
+        area, polygon = cv2.intersectConvexConvex(np.array(zone.polygon, dtype=np.float32), outline)
+        if polygon is None or area < 1:
+            raise ValueError(f"zone '{zone.id}' lies outside the box; move it back over the box")
+        fitted.append(Zone(id=zone.id, polygon=tuple((float(x), float(y)) for x, y in polygon.reshape(-1, 2))))
+    return tuple(fitted)
 
 
 def rectangle(x0: float, y0: float, x1: float, y1: float) -> tuple[tuple[float, float], ...]:

@@ -3,9 +3,9 @@ from pathlib import Path
 import pytest
 from streamlit.testing.v1 import AppTest
 
-from bench import EMPTY, WITH_DIVIDER, Bench
+from bench import EMPTY, WITH_DIVIDER, Bench, perspective
 from benchproof import checking
-from benchproof.checking import Checker
+from benchproof.checking import Capture, Checker
 from benchproof.drawing import jpeg, overlay
 from benchproof.llm import CallBudget
 from benchproof.models import Outcome
@@ -116,3 +116,20 @@ def test_approving_the_proposed_zones_calibrates_and_checks_the_divider(procedur
     assert bench.checker.session.calibration.revision == 1
     assert "place_divider" in bench.checker.session.passed_steps
     assert "PASS" in at.success[0].value
+
+
+def test_zones_for_a_box_seen_at_an_angle_can_be_approved(procedure, tmp_path):
+    bench = Bench(procedure, tmp_path, [EMPTY, WITH_DIVIDER])
+    bench.checker.check(bench.capture(), "show_empty_box")
+    taken = bench.capture()
+    reference = Capture(photo=taken.photo, observation=perspective(taken.observation))
+    at = page()
+    at.session_state["pending"] = (reference, checking.propose_zones(reference.observation, procedure.zones))
+    started_with(at, bench.checker)
+
+    assert at.error == []
+    next(b for b in at.button if b.label == "Approve zones and check").click().run()
+
+    assert not at.exception
+    assert at.error == []
+    assert bench.checker.session.calibration is not None

@@ -104,14 +104,21 @@ def approve_zones(checker: checking.Checker) -> None:
             x0, x1 = st.slider(f"{zone.id}: left and right", 0, photo.width, (round(min(xs)), round(max(xs))))
             y0, y1 = st.slider(f"{zone.id}: top and bottom", 0, photo.height, (round(min(ys)), round(max(ys))))
             zones.append(zone.model_copy(update={"polygon": checking.rectangle(x0, y0, x1, y1)}))
-    zones = tuple(zones)
+    # Slider values are rectangles; trim them to the box outline as the proposal was.
+    try:
+        zones = checking.fit_to_box(capture.observation, tuple(zones))
+        problem = None
+    except ValueError as e:
+        zones, problem = (), str(e)
 
     st.image(picture(photo, capture.observation.detections, zones), caption="Proposed zones")
+    if problem:
+        st.error(f"These zones cannot be used: {problem}")
     approve_col, retake_col = st.columns(2)
     if retake_col.button("Retake the photo"):
         del state.pending
         st.rerun()
-    if not approve_col.button("Approve zones and check", type="primary"):
+    if not approve_col.button("Approve zones and check", type="primary", disabled=problem is not None):
         return
     try:
         calibration = checker.calibrate(capture, zones, state.author, datetime.now(UTC))
