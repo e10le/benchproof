@@ -10,7 +10,7 @@ from benchproof import checking
 from benchproof.drawing import jpeg, overlay
 from benchproof.llm import ModelError
 from benchproof.models import Judgment, Outcome, Procedure, Zone
-from benchproof.photos import Photo
+from benchproof.photos import CAMERA_RESOLUTION, Photo
 
 ROOT = Path(__file__).parent.parent
 PROCEDURE_PATH = ROOT / "procedures" / "mobile_desk_kit.json"
@@ -198,7 +198,7 @@ def main() -> None:
         source = st.radio("Image source", ["Webcam", "Upload"], horizontal=True)
         key = f"photo-{state.shots}"
         if source == "Webcam":
-            image = st.camera_input("Photo from the fixed camera", key=key)
+            image = st.camera_input("Photo from the fixed camera", key=key, resolution=CAMERA_RESOLUTION)
         else:
             image = st.file_uploader("Photo from the fixed camera", type=["png", "jpg", "jpeg", "webp"], key=key)
 

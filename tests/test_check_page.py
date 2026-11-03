@@ -133,3 +133,9 @@ def test_zones_for_a_box_seen_at_an_angle_can_be_approved(procedure, tmp_path):
     assert not at.exception
     assert at.error == []
     assert bench.checker.session.calibration is not None
+
+
+def test_webcam_asks_for_the_same_size_on_every_photo(procedure, tmp_path):
+    # Left to the widget's width, the browser can switch webcam modes and break zone registration.
+    at = started(Bench(procedure, tmp_path, []).checker)
+    assert at.get("camera_input")[0].proto.resolution_height == 720

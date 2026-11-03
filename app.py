@@ -5,6 +5,7 @@ from PIL import UnidentifiedImageError
 
 from benchproof.labels import SCENARIO_EXPECTED, Scenario, Split, load_labels, save_capture
 from benchproof.models import Outcome, Procedure
+from benchproof.photos import CAMERA_RESOLUTION
 
 ROOT = Path(__file__).parent
 PROCEDURE_PATH = ROOT / "procedures" / "mobile_desk_kit.json"
@@ -30,7 +31,7 @@ capture_col, label_col = st.columns(2)
 with capture_col:
     source = st.radio("Image source", ["Webcam", "Upload"], horizontal=True)
     if source == "Webcam":
-        image = st.camera_input("Photo from the fixed camera")
+        image = st.camera_input("Photo from the fixed camera", resolution=CAMERA_RESOLUTION)
     else:
         image = st.file_uploader("Photo from the fixed camera", type=["png", "jpg", "jpeg"])
 

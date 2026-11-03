@@ -43,3 +43,8 @@ def test_label_read_failures_are_visible_without_app_crash(monkeypatch, error):
     assert not at.exception
     assert "Could not load labels" in at.error[0].value
     assert str(error) in at.error[0].value
+
+
+def test_webcam_asks_for_the_same_size_every_time():
+    at = AppTest.from_file(str(APP), default_timeout=APP_TIMEOUT).run()
+    assert at.get("camera_input")[0].proto.resolution_height == 720

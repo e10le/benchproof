@@ -7,6 +7,9 @@ from PIL import Image, ImageOps
 # Phone photos are 12 MP or more; the models see a downscaled copy, which keeps each check fast and cheap.
 MAX_SIDE = 1600
 JPEG_QUALITY = 92
+# The webcam is asked for the same size every time. Left to the widget's display width, the browser can
+# switch camera modes between photos, and a cropped mode moves the box in the frame.
+CAMERA_RESOLUTION = "720p"
 
 
 @dataclass(frozen=True)
